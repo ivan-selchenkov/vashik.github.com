@@ -1,64 +1,71 @@
 <html>
 <head>
     <meta content='text/html;charset=UTF-8' http-equiv='Content-Type'>
-    <title>scrollPagination+</title>
+    <title>jquery.esn.autobrowse</title>
+    <style type="text/css">
+      ul {
+        list-style-type: none;
+      }
+      li {
+        float: left;
+        padding: 10px;        
+      }
+      li img {
+        max-width: 150px;
+        max-height: 150px;
+      }
+    </style>
     <script src="jquery.js" type="text/javascript"></script>
-    <script src="scrollpagination.js" type="text/javascript"></script>
+    <script src="jquery.infiniteScroller.js" type="text/javascript"></script>
     <script type="text/javascript">
+      var trfh = [], truid = [], trsub = [], trsrv = [], ntrend;
+      var page = 0;
+
       $(function(){
-        $('#container').scrollPagination({
-            url: 'http://api.flickr.com/services/rest/?jsoncallback=?',
-
-            contentData: { 
-              page: 1,
-              format: 'json',
-              sort: 'random',
-              method: 'flickr.photos.search',
-              tags: 'nature,kamchatka',
-              tag_mode: 'all',
-              api_key: '66c61b93c4723c7c3a3c519728eac252',
-              per_page: 4
+        $('#container').infiniteScroller({
+            ajax: { 
+                url: "http://api.flickr.com/services/rest/?jsoncallback=?", 
+                dataType: "jsonp", 
+                data: { 
+                  format: 'json',
+                  sort: 'random',
+                  method: 'flickr.photos.search',
+                  tags: 'nature,alpes',
+                  tag_mode: 'all',
+                  api_key: '66c61b93c4723c7c3a3c519728eac252',
+                  per_page: 10
+                } 
+            },    
+            heightOffset: 100,     
+            pageOffset: "page",   
+            getPage: function() {
+                return page++;
             },
-            type: 'GET',
-            dataType: 'jsonp',
-            offset: 'page', // Name of offset param in URL
-            contentTarget: $('#content'), // New items will be added to this block
-            scrollTarget: $('#container'), // Container with scroll, it keeps contentTarget div too.
-            heightOffset: 10, // Pixels from bottom of scroll to initiate request of new content
-            // Getting content and rendering html 
-            render: function(response) {
-              var markup = "";
-
-              $(response.photos.photo).each(function(key, photo) {
+            onComplete: function(result) {
+              $(result.photos.photo).each(function(key, photo) {
                   t_url = "http://farm" + photo.farm +
                    ".static.flickr.com/" + photo.server + "/" +
                    photo.id + "_" + photo.secret + "_" + "m.jpg";                  
-
-
-                   markup +=  '<img alt="'+ photo.title + '"src="' + t_url + '"/>'  ;
+                    
+                    $('#container').append(
+                        $('<li/>').append(
+                            $('<img/>').attr(
+                                { alt: photo.title, src: t_url }
+                            )
+                        )
+                    );
               })
-
-              return markup;
-            },
-            // Returns number of elements to increment offset for next request
-            getNumberElements: function() {
-              return 1;
             }
-        });                
+        });
       });
+
+
     </script>
-    <style type="text/css">
-      #content img {
-        margin: 5px;
-      }
-    </style>
 </head>
 <body>
 
-<div id="container" style="width: 600px; height: 200px; background-color: gray; overflow-y: scroll;">
-  <div id="content">
-  </div>
-</div>
+<ul id="container" style="width: 400px; height: 400px; background-color: gray; overflow-y: scroll;">
+</ul>
 
 </body>
 </html>
